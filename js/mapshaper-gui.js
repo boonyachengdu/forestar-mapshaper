@@ -586,6 +586,12 @@
     }
 
 
+    /**
+     * FORESTAR:派发事件
+     * @param type
+     * @param obj
+     * @param listener
+     */
     // @obj (optional) data object, gets mixed into event
     // @listener (optional) dispatch event only to this object
     EventDispatcher.prototype.dispatchEvent = function (type, obj, listener) {
@@ -1566,6 +1572,9 @@
             procNextQueuedFile();
         }
 
+        /**
+         * FORESTAR: datasetIsEmpty（dataset为空判断）
+         */
         function datasetIsEmpty(dataset) {
             return dataset.layers.every(function (lyr) {
                 return internal.getFeatureCount(lyr) === 0;
@@ -3076,6 +3085,9 @@
             setTimeout(updateSync, 10);
         }
 
+        /**
+         * FORESTAR:同步更新
+         */
         function updateSync() {
             var e = model.getActiveLayer();
             var dataset = e.dataset;
@@ -3117,6 +3129,11 @@
             reset();
         }
 
+        /**
+         *FORESTAR: 显示图形
+         * @param XX
+         * @param arcs
+         */
         function showIntersections(XX, arcs) {
             var n = XX.length, pointLyr;
             _currXX = XX;
@@ -10871,6 +10888,13 @@
     }
 
 
+    /**
+     * FORESTAR: 展示图层
+     * @param layer
+     * @param dataset
+     * @param opts
+     * @returns {{style: null, source: {dataset: *, layer: *}, arcs: null, layer: null, empty: boolean}}
+     */
     // Wrap a layer in an object along with information needed for rendering
     function getDisplayLayer(layer, dataset, opts) {
         var obj = {
@@ -10982,6 +11006,11 @@
 
     utils.inherit(MshpMap, EventDispatcher);
 
+    /**
+     * FORESTAR: MAP 展示容器
+     * @param gui
+     * @constructor
+     */
     function MshpMap(gui) {
         var opts = gui.options,
             el = gui.container.findChild('.map-layers').node(),
@@ -11018,8 +11047,16 @@
             _mouse.disable();
         });
 
+        /**
+         * FORESTAR:更新事件绑定
+         */
         model.on('update', onUpdate);
 
+        /**
+         * FORESTAR: 展示分段图层
+         * @param lyr
+         * @param dataset
+         */
         // Update display of segment intersections
         this.setIntersectionLayer = function (lyr, dataset) {
             if (lyr == _intersectionLyr) return; // no change
@@ -11033,6 +11070,11 @@
             drawLayers();
         };
 
+        /**
+         * FORESTAR: 设置图层可见性
+         * @param target
+         * @param isVisible
+         */
         this.setLayerVisibility = function (target, isVisible) {
             var lyr = target.layer;
             lyr.visibility = isVisible ? 'visible' : 'hidden';

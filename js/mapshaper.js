@@ -4105,6 +4105,12 @@
     };
   }
 
+  /**
+   * FORESTAR: 初始化xx,yy对应的点链
+   * @param xx
+   * @param yy
+   * @returns {Int32Array}
+   */
   function initPointChains(xx, yy) {
     var chainIds = initHashChains(xx, yy),
         j, next, prevMatchId, prevUnmatchId;
@@ -8485,6 +8491,7 @@
       return new ShpReader(shpSrc, shxSrc);
     }
 
+    var shapeObjects=[];// 存储图形数据
     var shpFile = utils.isString(shpSrc) ? new FileReader(shpSrc) : new BufferReader(shpSrc);
     var header = parseHeader(shpFile.readToBinArray(0, 100));
     var shpSize = shpFile.size();
@@ -8498,6 +8505,14 @@
     }
 
     reset();
+
+    this.getShapeObjects = function(){
+      return shapeObjects;
+    }
+
+    this.header = function() {
+      return header;
+    };
 
     this.header = function() {
       return header;
@@ -8526,6 +8541,9 @@
         }
         shpFile.close();
         reset();
+      }
+      if(shape){
+        shapeObjects.push({id:shape.id,type:shape.type,partCount:shape.partCount,pointCount:shape.pointCount,coordinates:JSON.stringify(shape.readPoints())});
       }
       return shape;
     };
@@ -9546,7 +9564,8 @@
         // shp.stream2(importer);
       }
     });
-
+    var shapeObjects = reader.getShapeObjects();
+    importer.setShapeObjects(shapeObjects);
     return importer.done();
   }
 
@@ -12186,6 +12205,10 @@
     };
   }
 
+  /**
+   * FORESTAR: 线面转为拓扑结构数据
+   * @param dataset
+   */
   // Converts all polygon and polyline paths in a dataset to a topological format
   // (in-place)
   function buildTopology(dataset) {
@@ -12219,6 +12242,13 @@
   //
   // Negative arc ids in the paths array indicate a reversal of arc -(id + 1)
   //
+  /**
+   * FORESTAR: 构建路径拓扑结构
+   * @param nn
+   * @param xx
+   * @param yy
+   * @returns {{xx, yy, nn}}
+   */
   function buildPathTopology(nn, xx, yy) {
     var pointCount = xx.length,
         chainIds = initPointChains(xx, yy),
@@ -12422,6 +12452,9 @@
     return pathIds;
   }
 
+  /**
+   * FORESTAR: 替换arcIds
+   */
   function replaceArcIds(src, replacements) {
     return src.map(function(shape) {
       return replaceArcsInShape(shape, replacements);
@@ -12588,6 +12621,11 @@
     return name;
   }
 
+  /**
+   * FORESTAR：设置图层名称
+   * @param {*} lyr 
+   * @param {*} path 
+   */
   // initialize layer name using filename
   function setLayerName(lyr, path) {
     if (!lyr.name) {
