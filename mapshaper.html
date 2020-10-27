@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>mapshaper地图数据编辑工具</title>
+    <title>OpenLayers地图数据编辑工具</title>
     <meta name="Description" content="A tool for topologically aware shape simplification. Reads and writes Shapefile, GeoJSON and TopoJSON formats.">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="stylesheet" href="css/page.css">
-    <link rel="stylesheet" href="css/elements.css">
     <link rel="icon"  type="image/png"   href="images/icon.png">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/tools/page.css">
+    <link rel="stylesheet" href="css/tools/elements.css">
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
 </head>
 <body>
+<div id="feature-attribute-info" style="display: none;top:100px;float: left;z-index: 200;color: red;position: relative;width: 15%;height: 500px;background-color: aquamarine;opacity: 0.5;overflow:auto;" >
+
+</div>
+<!--SVG图标隐藏内容-->
 <div class="hidden">
     <svg version="1.1" id="home-icon" xmlns="http://www.w3.org/2000/svg" x="0px"
          y="0px" width="14px" height="19px" viewBox="0 0 14 16">
@@ -58,9 +64,9 @@
     </svg>
 
 </div>
-
+<!--页面头部内容-->
 <div class="page-header">
-    <div class="mapshaper-logo">map<span class="logo-highlight">shaper</span></div>
+    <div class="mapshaper-logo">Forestar-map<span class="logo-highlight">shaper</span></div>
 
     <div class="layer-control-btn"><span class="btn header-btn layer-name"></span></div>
 
@@ -72,20 +78,23 @@
         <input type="text" value="label" class="clicktext" />
     </div></div>
     <div id="mode-buttons" class="page-header-buttons">
+        <!--简化和导出-->
         <span class="simplify-btn header-btn btn">Simplify</span><span class="separator"></span><span class="console-btn header-btn btn">Console</span><span class="separator"></span><span class="export-btn header-btn btn">Export</span>
     </div>
-    <div id="splash-buttons" class="page-header-buttons">
-        <a href="https://github.com/mbloch/mapshaper/wiki"><span id="wiki-btn" class="header-btn btn">Wiki</span></a><span class="separator"></span><a href="https://github.com/mbloch/mapshaper"><span id="github-btn" class="header-btn btn">GitHub</span></a>
-    </div>
+    <!--<div id="splash-buttons" class="page-header-buttons">-->
+    <!--&lt;!&ndash;wiki和Github&ndash;&gt;-->
+    <!--&lt;!&ndash;<a href="https://github.com/mbloch/mapshaper/wiki"><span id="wiki-btn" class="header-btn btn">Wiki</span></a><span class="separator"></span><a href="https://github.com/mbloch/mapshaper"><span id="github-btn" class="header-btn btn">GitHub</span></a>&ndash;&gt;-->
+    <!--</div>-->
 </div>
 
+<!--浏览器兼容信息-->
 <div id="mshp-not-supported" class="main-area">
     <div class="info-box">
         <h3>Unfortunately, mapshaper can't run in <span class="unsupported-browser">this web browser</span></h3>
         <div>For best results, try <a href="https://www.google.com/chrome/browser/desktop/">Google Chrome</a> or <a href="http://www.mozilla.org/en-US/firefox/new/">Mozilla Firefox</a>.</div>
     </div>
 </div>
-
+<!--信息提示框-->
 <div class="layer-control main-area popup-dialog">
     <div class="info-box">
         <div class="info-box-scrolled">
@@ -101,7 +110,7 @@
         </div>
     </div>
 </div>
-
+<!--信息提示框-->
 <div class="box-tool-options main-area popup-dialog">
     <div class="info-box controls">
         <div>
@@ -115,7 +124,7 @@
         <div class="box-coords selectable"></div>
     </div>
 </div>
-
+<!--信息提示框-->
 <div class="selection-tool-options main-area popup-dialog">
     <div class="info-box">
         <div>
@@ -126,7 +135,7 @@
         </div>
     </div>
 </div>
-
+<!--信息提示框-->
 <div class="export-options main-area popup-dialog">
     <div class="info-box">
         <h3>Export menu</h3>
@@ -147,6 +156,7 @@
     </div>
 </div>
 
+<!--精简操作-->
 <div class="simplify-options main-area popup-dialog">
     <div class="info-box">
         <h3>Simplification menu</h3>
@@ -198,30 +208,29 @@
     </div> <!-- .info-box -->
 </div> <!-- simplify-options -->
 
+<!--选择文件类型说明-->
 <div id="splash-screen" class="main-area">
-    <div>
-        <h3>Mapshaper is an editor for map data</h3>
-    </div>
     <div id="drop-areas" class="drop-area-wrapper main-area">
 
         <div class="file-catalog catalog-area">
         </div>
         <div class="file-catalog-spacer spacer"></div>
-
+        <!--选择文件和类型说明-->
         <div id="import-drop" class="drop-area">
-            <h4>Drop files here or <span class="inline-btn btn" id="file-selection-btn"><span class="label-text">select</span></span> from a folder</h4>
-            <div class="subtitle">Shapefile, GeoJSON, TopoJSON, DBF and CSV files are supported</div>
+            <h4>Drop files here or <span class="inline-btn btn" id="file-selection-btn"><span class="label-text">Select</span></span> </h4>
+            <div class="subtitle">Shapefile, GeoJSON, TopoJSON, DBF and CSV files are supported </div>
             <div class="subtitle">Files can be loose or in a zip archive</div>
 
         </div>
         <div class="spacer"></div>
-        <div id="import-quick-drop" class="drop-area">
+        <!--文件快速导入拖拽功能-->
+        <div id="import-quick-drop" class="drop-area" >
             <h4>Quick import</h4>
             <div class="subtitle">Drop files here to import with default settings</div>
         </div>
     </div>
 </div>
-
+<!--导入信息配置：弹出提示框-->
 <div id="import-options" class="main-area popup-dialog">
     <div class="info-box">
         <!-- <h4>Queued files</h4> -->
@@ -266,7 +275,7 @@
     </div> <!-- .info-box -->
 </div> <!-- import-options -->
 
-
+<!--主页面数据展示容器-->
 <!-- TODO: remove #mshp-main-page without causing the map to jitter when resized -->
 <div id="mshp-main-page">
     <div class="console main-area console-area">
@@ -278,10 +287,12 @@
             <div class="intersection-count">0 line intersections</div>
             <div class="repair-btn text-btn colored-text">Repair</div>
         </div>
-        <div class="map-layers"></div>
+        <div id="map" class="map-layers" >
+
+        </div>
     </div>
 </div>
-
+<!--拖拽区域-->
 <div id="import-options-drop-area" class="main-area drop-area-wrapper hidden">
     <div class="drop-area"></div>
 </div>
@@ -298,18 +309,20 @@
     };
 </script>
 <script>
-    (function (i, s, o, g, r, a, m) {
-        i['GoogleAnalyticsObject'] = r;
-        i[r] = i[r] || function () {
-            (i[r].q = i[r].q || []).push(arguments)
-        }, i[r].l = 1 * new Date();
-        a = s.createElement(o),
-            m = s.getElementsByTagName(o)[0];
-        a.async = 1;
-        a.src = g;
-        m.parentNode.insertBefore(a, m)
-    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
-    ga('create', 'UA-42716717-1', 'mapshaper.org');
-    ga('send', 'pageview');
+    /*  (function (i, s, o, g, r, a, m) {
+          i['GoogleAnalyticsObject'] = r;
+          i[r] = i[r] || function () {
+              (i[r].q = i[r].q || []).push(arguments)
+          }, i[r].l = 1 * new Date();
+          a = s.createElement(o),
+              m = s.getElementsByTagName(o)[0];
+          a.async = 1;
+          a.src = g;
+          m.parentNode.insertBefore(a, m)
+      })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+      ga('create', 'UA-42716717-1', 'mapshaper.org');
+      ga('send', 'pageview');*/
 </script></body>
+
+</body>
 </html>
