@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>空间数据读取工具</title>
+    <meta name="Description" content="A tool for topologically aware shape simplification. Reads and writes Shapefile, GeoJSON and TopoJSON formats.">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="icon"  type="image/png"   href="images/icon.png">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="js/OpenLayers/v4.5.0/ol.css" type="text/css">
+    <script src="js/OpenLayers/v4.5.0/ol.js"></script>
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+</head>
+<body>
+<div><input id="shpFiles" type="file" multiple="multiple" value="选择文件"/></div>
+<div id="feature-attribute-info" class="feature-attribute-info" > </div>
+<div id ="map" class="map-container"></div>
+<script src="js/OpenLayers/map.js"></script>
+<script src="js/modules.js" type="text/javascript"></script>
+<!-- <script src="js/mapshaper.js" type="text/javascript"></script> -->
+<script src="js/forestar-mapshaper-simple.js" type="text/javascript"></script>
+<script src="js/forestar-shpfile-reader.js" type="text/javascript"></script>
+</body>
+</html>

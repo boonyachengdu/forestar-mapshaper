@@ -41,6 +41,8 @@ function MapTools() {
             console.info("==resetFeaturesStyle==");
         }
     }
+    that.map.mapElement = document.getElementById("map");
+    that.map.mapFeatureInfoElement = document.getElementById("feature-attribute-info");
     // 打开要素信息描述窗口(选择要素和属性回调函数)
     that.map.showFeatureInfo = function (index) {
         var that = this;
@@ -57,15 +59,16 @@ function MapTools() {
         for (var i = 0 , j = fields.length; i < j; i++) {
             html+="<p>"+fields[i]+" : "+shapeAttribute[fields[i]]+"</p>";
         }
-        var objInfo = document.getElementById("feature-attribute-info");
-        objInfo.style.display = "block";
-        objInfo.innerHTML = html;
+
+        that.mapFeatureInfoElement.style.display = "block";
+        that.mapFeatureInfoElement.innerHTML = html;
+
     }
     // 打开要素信息描述窗口
     that.map.hideFeatureInfo = function () {
-        var objInfo = document.getElementById("feature-attribute-info");
-        objInfo.style.display = "none";
-        objInfo.innerHTML = "";
+        var that = this;
+        that.mapFeatureInfoElement.style.display = "none";
+        that.mapFeatureInfoElement.innerHTML = "";
     }
 }
 
@@ -480,31 +483,4 @@ MapTools.prototype.loadDataToVectorLayer = function (dataSets) {
     }
 }
 
-/**
- * Unit8Array数据转字符串
- *
- * @param fileData
- * @returns {string}
- */
-unit8ArrayToString = function (unit8Array) {
-    var str = "";
-    for (var i = 0; i < unit8Array.length; i++) {
-        str += String.fromCharCode(unit8Array[i]);
-    }
-    return str;
-}
-
-/**
- *
- * @param arrayBuffer
- * @constructor
- */
-arrayBufferToString = function (arrayBuffer) {
-    var b = new Blob([arrayBuffer]);
-    var r = new FileReader();
-    r.readAsText(b, 'utf-8');
-    r.onload = function () {
-        console.info("arrayBufferToString->" + r.result);
-    }
-}
 var mapTools = new MapTools();

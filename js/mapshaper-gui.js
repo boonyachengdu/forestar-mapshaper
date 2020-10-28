@@ -1757,7 +1757,7 @@
 
         /**
          *  FORESTAR: handleImportError（导入文件错误处理）
-         * @param e
+         * @param ereadImportOpts
          * @param fileName
          */
         function handleImportError(e, fileName) {

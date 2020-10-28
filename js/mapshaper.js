@@ -12143,6 +12143,9 @@
       return arcId;
     };
 
+     /**
+     * FORESTAR: 查找重复的arc
+     */
     // Look for a previously generated arc with the same sequence of coords, but in the
     // opposite direction. (This program uses the convention of CW for space-enclosing rings, CCW for holes,
     // so coincident boundaries should contain the same points in reverse sequence).
@@ -12161,6 +12164,9 @@
       return arcId;
     };
 
+     /**
+     * FORESTAR: 查找相邻的arc
+     */
     function findArcNeighbor(xx, yy, start, end, getNext) {
       var next = getNext(start),
           key = hash(xx[start], yy[start]),
@@ -12341,6 +12347,9 @@
       return arcIds;
     }
 
+    /**
+     * FORESTAR: 是否是一个图形的结束点
+     */
     // Test if a point @id is an endpoint of a topological path
     function pointIsArcEndpoint(id) {
       var id2 = chainIds[id],
@@ -12404,6 +12413,9 @@
       return arcId;
     }
 
+     /**
+     * FORESTAR: 添加闭合图形边界
+     */
     function addEdge(start, end) {
       // search for a matching edge that has already been generated
       var arcId = index.findDuplicateArc(xx, yy, start, end, nextPoint, prevPoint);
@@ -12414,6 +12426,9 @@
       return arcId;
     }
 
+    /**
+     * FORESTAR: 添加闭合图形
+     */
     function addRing(startId, endId) {
       var chainId = chainIds[startId],
           pathId = pathIds[startId],
