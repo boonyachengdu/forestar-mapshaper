@@ -275,14 +275,14 @@ MapTools.prototype.transform = function (x, y, srcProject, destProject) {
  * @param count
  * @returns {*}
  */
-MapTools.prototype.typeCount = function (data, count) {
+MapTools.prototype.deepCount = function (data, count) {
     if (!count) {
         count = 0;
     }
     if (Array.isArray(data)) {
         count += 1;
         var childData = data[0];
-        return this.typeCount(childData, count);
+        return this.deepCount(childData, count);
     }
     return count;
 }
@@ -402,12 +402,11 @@ MapTools.prototype.readPolygonData = function (id,coordinates) {
             continue;
         }
         // end
+        endIndex = i;
         if(endPoint == null){
-            endIndex = i;
             endPoint = coordinates[endIndex];
             continue;
         }else{
-            endIndex = i;
             endPoint = coordinates[endIndex];
         }
         // find end point
