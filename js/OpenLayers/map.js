@@ -302,58 +302,104 @@ MapTools.prototype.getEndPointIndex = function (firstIndex,coordinates) {
             count += 1;
         }
         if(count==2){
-            index == i;
+            index = i;
             break;
         }
     }
     return index;
 }
 /**
- *  解析面数据
+ * 修复性数据解析【此方法在闭合图形中适用，用于修复readPolygonData不能读取完整的情况】
  *
+ * @param id
  * @param coordinates
+ * @param partCount
  * @param arrays
  * @param firstIndex
- * @returns {*}
  */
-MapTools.prototype.parsePolygonData = function (coordinates,arrays,firstIndex) {
-    /*if(!firstIndex){
-        firstIndex = 0;
-    }
-    // 获取数据是否有结束节点
+MapTools.prototype.repairPolygonData = function (id,coordinates,arrays,firstIndex) {
     var endIndex = this.getEndPointIndex(firstIndex,coordinates);
     if(endIndex > -1){
-        var arr = coordinates.slice(firstIndex,endIndex);
+        var arr = coordinates.slice(firstIndex,endIndex+1);
         arrays.push(arr);
         firstIndex = endIndex;
-    }else{
-        var firstPoint = coordinates[firstIndex];
-        var arr = [];
-        arr.push(firstPoint);
-        arrays.push(arr);
     }
     firstIndex++;
     if(firstIndex<coordinates.length){
-       return this.parsePolygonData(coordinates,arrays,firstIndex);
-    }*/
+        return this.repairPolygonData(id,coordinates,arrays,firstIndex);
+    }
+    console.info("Repaired GeomData = "+JSON.stringify(arrays));
+    return arrays;
+}
+/**
+ * 修复性数据解析【此方法在闭合图形中适用，用于修复repairPolygonData不能读取完整的情况】
+ *
+ * @param id
+ * @param coordinates
+ * @param partArrays
+ */
+MapTools.prototype.repairMultiPolygonData = function (id,coordinates,partArrays) {
+    var that = this;
+    var arrays = [];
+    var count = coordinates.length;
+    var targetPoint = false;
+    var dataMap ={};
+    for (var i = 0; i < count; i++) {
+        var currentPoint = coordinates[i];
+        targetPoint = that.targetNotInStartAndEnd(currentPoint,partArrays);
+        if(targetPoint){
+            var lonLatKey = currentPoint[0]+"_"+currentPoint[1];
+            if(isNaN(dataMap[lonLatKey])){
+                dataMap[lonLatKey]= 1;
+            }else{
+                dataMap[lonLatKey]+=1;
+            }
+        }
+    }
+    var newDataMap = {};
+    for(var key in dataMap){
+        if(dataMap[key]>1){
+            newDataMap[key] = dataMap[key];
+        }
+    }
+    console.info("MultiPolygon dataMap = "+JSON.stringify(newDataMap));
+   return arrays;
+}
+/**
+ * 当前点不在开始和结束点位置
+ *
+ * @param currentPoint
+ * @param partArrays
+ */
+MapTools.prototype.targetNotInStartAndEnd = function (currentPoint,partArrays) {
+    var t = partArrays.length;
+    for (var i = 0; i < t; i++) {
+        var point = partArrays[i][0];// start,end点相同
+        if(point[0] == currentPoint[0] && point[1] == currentPoint[1]){
+            return false;
+        }
+    }
+    return true;
+}
+/**
+ * 解析面数据【此方法在闭合图形中适用】
+ *
+ * @param id
+ * @param coordinates
+ * @param partCount
+ * @returns {Array}
+ */
+MapTools.prototype.readPolygonData = function (id,coordinates) {
     var count = coordinates.length;
     var arrays = [];
-    var firstIndex,endIndex;
+    var firstIndex=0,endIndex=0;
     var firstPoint = null,endPoint = null;
     for (var i = 0; i < count; i++) {
         // first
         if(firstPoint == null){
             firstIndex = i;
             firstPoint = coordinates[firstIndex];
-           /* endIndex = this.getEndPointIndex(firstIndex,coordinates);
-            if(endIndex>-1){
-                endPoint = coordinates[endIndex];
-                var arr= coordinates.slice(firstIndex,endIndex+1);
-                arrays.push(arr);
-                firstPoint = null;
-                endPoint = null;
-                i = endIndex
-            }*/
+            continue;
         }
         // end
         if(endPoint == null){
@@ -366,13 +412,57 @@ MapTools.prototype.parsePolygonData = function (coordinates,arrays,firstIndex) {
         }
         // find end point
         if(firstPoint[0]== endPoint[0] && firstPoint[1]== endPoint[1]){
-            var arr= coordinates.slice(firstIndex,endIndex+1);
+            var arr= coordinates.slice(firstIndex,endIndex);
             arrays.push(arr);
             firstPoint = null;
             endPoint = null;
         }
     }
     return arrays;
+}
+/**
+ * 解析面数据【此方法在闭合图形中适用】
+ * @param id
+ * @param coordinates
+ * @param partCount
+ * @param package
+ * @returns {{data: Array, repaired: boolean}}
+ */
+MapTools.prototype.parsePolygonData = function (id,coordinates,partCount,package) {
+    var that = this;
+    var multiPolygonArrays= [];
+    var arrays = that.readPolygonData(id,coordinates);
+    var result = {};
+    result.id = id;
+    result.partCount = partCount;
+    result.realCount = arrays.length;
+    // 验证是否解析正确
+    if(partCount!= arrays.length){
+        result.coordinates= arrays;
+        console.warn("Polygon part parse error："+JSON.stringify(result));
+        arrays = that.repairPolygonData(id,coordinates,[],0);
+        var count = arrays.length;
+        for (var i =0; i < count; i++) {
+            console.info("Repaired polygon part["+(i+1)+"] data："+JSON.stringify(arrays[i]));
+        }
+        // 从整个数据中找多边形闭合图形
+        multiPolygonArrays = that.repairMultiPolygonData(id,coordinates,arrays);
+    }else{
+        console.info("Polygon part parse success："+JSON.stringify(result));
+    }
+    if(package){
+        var data = [];
+        data.push(arrays);
+        var count = multiPolygonArrays.length;
+        if(count>0){
+            for (var i = 0; i < count ; i++) {
+                data.push(multiPolygonArrays[i]);
+            }
+        }
+        return data;
+    }else{
+        return arrays;
+    }
 }
 /**
  * 根据数据部分类型判定Polygon|MultiPolygon geometry类型
@@ -391,22 +481,13 @@ MapTools.prototype.buildPolygonGeometry = function (data) {
     //var type = this.typeCount(coordinates, 0);
     var geometry = null,typeStr="";
     if(isMultiPolygon ){
-        if(id == 13){
-            console.info("repair : before > "+JSON.stringify(coordinates));
-        }
-        var array =[];
-        coordinates = this.parsePolygonData(coordinates,[],0);
-        array.push(coordinates);
-        coordinates = array;
-        if(id == 13){
-            console.info("repair : after > "+JSON.stringify(coordinates));
-        }
+        coordinates = this.parsePolygonData(id,coordinates,data.partCount,true);
         console.info("geom = MultiPolygon,id = " + id + ",type = " + dataType+" ,partCount = "+data.partCount);
         //console.info("geom = MultiPolygon,id = " + id + ",type = " + dataType+" ,partCount = "+data.partCount+" geoJSON = "+JSON.stringify(coordinates));
         geometry = new ol.geom.MultiPolygon(coordinates);
         typeStr = "MultiPolygon";
     }else{
-        coordinates = this.parsePolygonData(coordinates,[],0);
+        coordinates = this.parsePolygonData(id,coordinates,data.partCount,false);
         console.info("geom = Polygon,id = " + id + ",type = " + dataType+" ,partCount = "+data.partCount);
         //console.info("geom = Polygon,id = " + id + ",type = " + dataType+" ,partCount = "+data.partCount+" geoJSON = "+JSON.stringify(coordinates));
         geometry = new ol.geom.Polygon(coordinates);
