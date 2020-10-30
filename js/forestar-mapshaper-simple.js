@@ -18,8 +18,30 @@
     get initializeArray () { return initializeArray; },
     get createBuffer () { return createBuffer; },
     get pluck () { return pluck; },
+    get rpad () { return rpad; },
   });
   var Buffer = require('buffer').Buffer; // works with browserify
+
+  // Language & Language family names for some code pages
+  var encodingNames = {
+    '932': "Japanese",
+    '936': "Simplified Chinese",
+    '950': "Traditional Chinese",
+    '1252': "Western European",
+    '949': "Korean",
+    '874': "Thai",
+    '1250': "Eastern European",
+    '1251': "Russian",
+    '1254': "Turkish",
+    '1253': "Greek",
+    '1257': "Baltic"
+  };
+
+  function rpad(str, size, pad) {
+    pad = pad || ' ';
+    str = String(str);
+    return str + repeatString(pad, size - str.length);
+  }
 
   function pluck(arr, key) {
     return arr.map(function(obj) {
@@ -3158,6 +3180,31 @@
         r = function() {return null;};
       }
       return r;
+    }
+
+    // Convert an array of text samples to a single string using a given encoding
+    function decodeSamples(enc, samples) {
+      return samples.map(function(buf) {
+        return decodeString(buf, enc).trim();
+      }).join('\n');
+    }
+
+    // Format an array of (preferably short) strings in columns for console logging.
+    function formatStringsAsGrid(arr) {
+      // TODO: variable column width
+      var longest = arr.reduce(function(len, str) {
+            return Math.max(len, str.length);
+          }, 0),
+          colWidth = longest + 2,
+          perLine = Math.floor(80 / colWidth) || 1;
+      return arr.reduce(function(memo, name, i) {
+        var col = i % perLine;
+        if (i > 0 && col === 0) memo += '\n';
+        if (col < perLine - 1) { // right-pad all but rightmost column
+          name = utils.rpad(name, colWidth - 2, ' ');
+        }
+        return memo +  '  ' + name;
+      }, '');
     }
 
     function findStringEncoding() {
