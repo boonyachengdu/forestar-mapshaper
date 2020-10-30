@@ -525,6 +525,8 @@ MapTools.prototype.addFeature = function (feature) {
         //that.vectorLayer.setExtent(extent);
         //var center = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
         that.map.getView().fit(extent);
+    }else {
+        console.error("Not support feature.geometry_type value type: "+feature.geometry_type);
     }
 
 }
