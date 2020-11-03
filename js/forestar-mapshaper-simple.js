@@ -19,6 +19,7 @@
     get createBuffer () { return createBuffer; },
     get pluck () { return pluck; },
     get rpad () { return rpad; },
+    get contains () { return contains; },
   });
   var Buffer = require('buffer').Buffer; // works with browserify
 
@@ -36,6 +37,26 @@
     '1253': "Greek",
     '1257': "Baltic"
   };
+
+  // Test a string or array-like object for existence of substring or element
+  function contains(container, item) {
+    if (isString(container)) {
+      return container.indexOf(item) != -1;
+    }
+    else if (isArrayLike(container)) {
+      return indexOf(container, item) != -1;
+    }
+    error("Expected Array or String argument");
+  }
+
+  function indexOf(arr, item) {
+    var nan = item !== item;
+    for (var i = 0, len = arr.length || 0; i < len; i++) {
+      if (arr[i] === item) return i;
+      if (nan && arr[i] !== arr[i]) return i;
+    }
+    return -1;
+  }
 
   function rpad(str, size, pad) {
     pad = pad || ' ';
