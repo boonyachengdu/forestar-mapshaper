@@ -10148,6 +10148,12 @@
             }
         };
 
+        /**
+         * 前端canvas绘制arcs数据集合
+         *
+         * 1、需要弄清楚arcId对应的多个图形部分绘制和dbf属性的对应关系
+         * 2、前端图形交互重绘机制（保证完整图形--shape.readPoints()数据上不一定符合使用）
+         */
         _self.drawArcs = function (arcs, style, filter) {
             var startPath = getPathStart(_ext, getLineScale(_ext)),
                 t = getScaledTransform(_ext),
@@ -10269,6 +10275,13 @@
         }
     }
 
+    /**
+     * canvas 绘制图形路线
+     * @param vec
+     * @param t
+     * @param ctx
+     * @param minLen
+     */
     function drawPath(vec, t, ctx, minLen) {
         // copy to local variables because of odd performance regression in Chrome 80
         var mx = t.mx,
@@ -10304,6 +10317,13 @@
         };
     }
 
+    /**
+     * 获取一个arcId图形,是一个图形的x,y集合点[mapshaper的绘制方式]
+     *
+     * @param iter
+     * @param ext
+     * @returns {*}
+     */
     function protectIterForDrawing(iter, ext) {
         var bounds, k;
         if (ext.scale() > 100) {

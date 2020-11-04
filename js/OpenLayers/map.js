@@ -1,6 +1,13 @@
 /**
- * 工具类
+ * OPENLAYERS地图工具类
  *
+ * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ * 1、地图绘制geometry图形:支持点、线、面
+ * 2、数据来源：objects & arcs
+ * 3、图形解析polygon中可能包含点和线
+ * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ * @author PJL
+ * @date 2020/11/4
  * @constructor
  */
 function MapTools() {
@@ -332,7 +339,7 @@ MapTools.prototype.repairPolygonData = function (id,coordinates,arrays,firstInde
     return arrays;
 }
 /**
- * 修复性数据解析【此方法在闭合图形中适用，用于修复repairPolygonData不能读取完整的情况】
+ * 修复性数据解析【此方法有待完善:去掉闭合图形解析点、线】
  *
  * @param id
  * @param coordinates
@@ -341,7 +348,7 @@ MapTools.prototype.repairPolygonData = function (id,coordinates,arrays,firstInde
 MapTools.prototype.repairMultiPolygonData = function (id,coordinates,partArrays) {
     var that = this;
     var arrays = [];
-    var count = coordinates.length;
+   /* var count = coordinates.length;
     var targetPoint = false;
     var dataMap ={};
     for (var i = 0; i < count; i++) {
@@ -361,7 +368,7 @@ MapTools.prototype.repairMultiPolygonData = function (id,coordinates,partArrays)
         if(dataMap[key]>1){
             newDataMap[key] = dataMap[key];
         }
-    }
+    }*/
     console.info("MultiPolygon dataMap = "+JSON.stringify(newDataMap));
    return arrays;
 }
@@ -498,9 +505,10 @@ MapTools.prototype.buildPolygonGeometry = function (data) {
 /**
  * 添加单个要素信息
  *
- * @param layers
+ * @param feature
+ * @param dataSource  'objects' | 'arcs'
  */
-MapTools.prototype.addFeature = function (feature) {
+MapTools.prototype.addFeature = function (feature,dataSource) {
     var that = this;
     var addFeatureByChildren = function (feature) {
         for (var i = 0, j = feature.data.length; i < j; i++) {
@@ -528,32 +536,33 @@ MapTools.prototype.addFeature = function (feature) {
     }else {
         console.error("Not support feature.geometry_type value type: "+feature.geometry_type);
     }
-
 }
 /**
  * 添加多个要素信息
  *
  * @param dataset
+ * @param dataSource  'objects' | 'arcs'
  */
-MapTools.prototype.addFeatures = function (dataset) {
+MapTools.prototype.addFeatures = function (dataset,dataSource) {
     var that = this;
     // "{"input_files":["cs1618_655.shp"],"input_formats":["shapefile"],"import_options":{"no_repair":false,"snap":false},"prj":"GEOGCS[\"GCS_China_Geodetic_Coordinate_System_2000\",DATUM[\"D_China_2000\",SPHEROID[\"CGCS2000\",6378137.0,298.257222101]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]]"}"
     var features = dataset.layers;
     for (var i = 0, j = features.length; i < j; i++) {
         var feature = features[i];
         feature.arcs = dataset.arcs;
-        feature.data = dataset.shapeObjects;
+        feature.data = dataset.objects;
         feature.displayArcs = dataset.displayArcs;
         feature.info = dataset.info;
-        that.addFeature(feature);
+        that.addFeature(feature,dataSource);
     }
 }
 /**
- * 加载空间数据到矢量图层
+ *  加载空间数据到矢量图层
  *
  * @param dataSets
+ * @param dataSource 'objects' | 'arcs'
  */
-MapTools.prototype.loadDataToVectorLayer = function (dataSets) {
+MapTools.prototype.loadDataToVectorLayer = function (dataSets,dataSource) {
     var that = this;
     that.map.datasets = dataSets;
     for (var i = 0, j = that.map.datasets.length; i < j; i++) {
@@ -561,7 +570,7 @@ MapTools.prototype.loadDataToVectorLayer = function (dataSets) {
         dataset.fields = dataset.layers[0].data.getFields();
         dataset.attributeRows = dataset.layers[0].data.getRecords();
         that.map.datasets[i] = dataset;
-        that.addFeatures(dataset);
+        that.addFeatures(dataset,dataSource?dataSource:"objects");
     }
 }
 

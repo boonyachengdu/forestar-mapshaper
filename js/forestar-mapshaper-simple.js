@@ -4450,7 +4450,7 @@
       return new ShpReader(shpSrc, shxSrc);
     }
 
-    var shapeObjects=[];// 存储图形数据
+    var objects=[];// 存储图形数据
     var shpFile = utils.isString(shpSrc) ? new FileReader(shpSrc) : new BufferReader(shpSrc);
     var header = parseHeader(shpFile.readToBinArray(0, 100));
     var shpSize = shpFile.size();
@@ -4466,7 +4466,7 @@
     reset();
 
     this.getShapeObjects = function(){
-      return shapeObjects;
+      return objects;
     }
 
     this.header = function() {
@@ -4502,7 +4502,7 @@
         reset();
       }
       if(shape){
-        shapeObjects.push({id:shape.id,type:shape.type,partCount:shape.partCount,pointCount:shape.pointCount,coordinates:JSON.stringify(shape.readPoints())});
+          objects.push({id:shape.id,type:shape.type,partCount:shape.partCount,pointCount:shape.pointCount,coordinates:JSON.stringify(shape.readPoints())});
       }
       return shape;
     };
@@ -4914,7 +4914,7 @@
         /**
          * FORESTAR: 用于记录核心shape对象
          */
-        shapeObjects = [],
+        objects = [],
         shapes = [],
         properties = [],
         /**
@@ -4941,14 +4941,14 @@
      * FORESTAR: 设置shape设置(扩展)
      */
     this.setShapeObjects = function(shapesData){
-      shapeObjects = shapesData;
+        objects = shapesData;
     }
 
     /**
      * FORESTAR: 获取shape设置(扩展)
      */
     this.getShapeObjects=function(){
-      return shapeObjects;
+      return objects;
     }
 
     /**
@@ -5076,7 +5076,7 @@
         // 返回shap支持的类型
         ShpType: ShpType,
         // 返回shape可解析对象
-        shapeObjects: that.getShapeObjects(),
+        objects: that.getShapeObjects(),
         arcs: arcs || null,
         info: {},
         layers: layers
@@ -5220,8 +5220,8 @@
         // shp.stream2(importer);
       }
     });
-    var shapeObjects = reader.getShapeObjects();
-    importer.setShapeObjects(shapeObjects);
+    var objects = reader.getShapeObjects();
+    importer.setShapeObjects(objects);
     return importer.done();
   }
 
