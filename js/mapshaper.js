@@ -4868,7 +4868,7 @@
     };
 
     /**
-     * FORESTAR: 获取端点位置
+     * FORESTAR: 获取分段对应点位置
      */
     this.getVertex = function(arcId, nth) {
       var i = this.indexOfVertex(arcId, nth);
@@ -9257,13 +9257,24 @@
         xx = new Float64Array(bufSize),
         yy = new Float64Array(bufSize),
         /**
-         * FORESTAR: 用于记录核心shape对象
+         * 用于记录核心shape对象
          */
         shapeObjects = [],
+        /**
+         * 图形对应关系==>shapes(shapes,266)->nn(paths,2420)
+         *
+         * 对应关系如：shapes(shapes,0)->nn(paths,[nn(1),nn(2),...,nn(m)])
+         * 对应关系如：shapes(shapes,265)->nn(paths,[nn(2418),nn(2419),...,nn(m)])
+         * @type {Array}
+         */
         shapes = [],
+        /**
+         * DBF 对应的属性数据
+         * @type {Array}
+         */
         properties = [],
         /**
-         * FORESTAR: 多部分分段数据
+         * paths分段数据
          */
         nn = [],
         types = [],
@@ -9368,6 +9379,9 @@
     //
     this.done = function() {
       var that = this;
+      /**
+       * 图形对应关系==>shapes(shapes,2420)->nn(paths,2420)
+       */
       var arcs;
       var layers;
       var lyr = {name: ''};
